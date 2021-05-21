@@ -1,0 +1,69 @@
+service: kinesisPitfalls
+
+plugins:
+  - serverless-esbuild
+
+custom:
+  project: betterdev
+  baseName: ${self:custom.project}-${self:provider.stage}-${self:service}
+
+  esbuild:
+    target: node14
+    minify: true
+    sourcemap: true
+
+provider:
+  name: aws
+  region: eu-west-1
+  stage: ${opt:stage, 'dev'}
+  stackName: ${self:custom.baseName}
+  deploymentBucket:
+    blockPublicAccess: true
+  runtime: nodejs14.x
+  memorySize: 256
+  timeout: 5
+  versionFunctions: false
+  logRetentionInDays: 30
+  environment:
+    LOG_LEVEL: debug
+
+functions:
+  consumer:
+    name: ${self:custom.baseName}-consumer
+    handler: src/index.handler
+    events:
+      - stream:
+          type: kinesis
+          arn:
+            Fn::GetAtt: [ KinesisStream, Arn ]
+          startingPosition: LATEST
+          parallelizationFactor: 5
+          batchSize: 100
+          batchWindow: 5
+          maximumRetryAttempts: 5
+          bisectBatchOnFunctionError: true
+          destinations:
+            onFailure:
+              type: sqs
+              arn:
+                Fn::GetAtt: [ RecordsDLQ, Arn ]
+
+resources:
+  Resources:
+
+    KinesisStream:
+      Type: AWS::Kinesis::Stream
+      Properties:
+        Name: ${self:custom.baseName}
+        RetentionPeriodHours: 24
+        ShardCount: 2
+
+    RecordsDLQ:
+      Type: AWS::SQS::Queue
+
+    KinesisStreamArnParam:
+      Type: AWS::SSM::Parameter
+      Properties:
+        Name: /${self:custom.project}/${self:provider.stage}/${self:service}/kinesisStreamName
+        Type: String
+        Value: !Ref KinesisStream
