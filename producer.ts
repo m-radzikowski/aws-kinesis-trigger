@@ -16,7 +16,7 @@ const encoder = new TextEncoder();
 
 const main = async () => {
     const streamNameResult = await ssm.send(new GetParameterCommand({
-        Name: `/blog/${argv.stage}/kinesisMistakes/kinesisStreamName`,
+        Name: `/betterdev/${argv.stage}/kinesisPitfalls/kinesisStreamName`,
     }));
     const streamName = streamNameResult.Parameter?.Value || '';
 

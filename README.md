@@ -28,6 +28,12 @@ Deploy:
 yarn run deploy --region REGION [--stage STAGE]
 ```
 
+Send new records to the Kinesis:
+
+```bash
+yarn run produce --region REGION [--stage STAGE]
+```
+
 Remove deployed stack:
 
 ```bash
