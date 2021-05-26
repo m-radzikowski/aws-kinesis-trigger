@@ -9,7 +9,7 @@ This configuration aims to avoid common pitfalls:
 - wrong starting position
 - insufficient parallelization
 
-See the article for full description: *TODO*
+See the article for full description: [6 Common Pitfalls of AWS Lambda with Kinesis Trigger](https://dashbird.io/blog/lambda-kinesis-trigger/)
 
 ## Development
 
